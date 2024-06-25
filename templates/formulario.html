@@ -1,38 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Clasificador de Insectos</title>
+    <title>Predicción de precio de ajuste cerrado</title>
     <script>
-        function clasificarInsecto(event) {
+        async function clasificarInsecto(event) {
             event.preventDefault();
             const open = document.getElementById('open').value;
             const high = document.getElementById('high').value;
             const low = document.getElementById('low').value;
             const close = document.getElementById('close').value;
             
-            fetch('/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `open=${open}&high=${high}&low=${low}&close=${close}`,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    document.getElementById('resultado').innerText = 'Error: ' + data.error;
-                } else {
-                    document.getElementById('resultado').innerText = 'El precio de ajuste cerrado es: ' + data.categoria;
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `open=${open}&high=${high}&low=${low}&close=${close}`,
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    document.getElementById('resultado').innerText = 'Error: ' + errorData.error;
+                    return;
                 }
-            })
-            .catch(error => {
+                
+                const data = await response.json();
+                document.getElementById('resultado').innerText = 'El precio de ajuste cerrado es: ' + data.categoria;
+            } catch (error) {
                 document.getElementById('resultado').innerText = 'Error en la solicitud.';
                 console.error('Error:', error);
-            });
+            }
         }
     </script>
     <style>
-        body{
+        body {
             font-family: Arial, sans-serif;
             width: 100%;
             height: 93vh;
